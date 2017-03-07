@@ -957,6 +957,9 @@ int cpcap_regacc_init(struct cpcap_device *cpcap);
 void cpcap_broadcast_key_event(struct cpcap_device *cpcap,
 			       unsigned int code, int value);
 
+void cpcap_broadcast_sw_event(struct cpcap_device *cpcap,
+			       unsigned int code, int value);
+
 int cpcap_irq_init(struct cpcap_device *cpcap);
 
 void cpcap_irq_shutdown(struct cpcap_device *cpcap);

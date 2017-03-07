@@ -82,6 +82,10 @@ static int __init cpcap_key_probe(struct platform_device *pdev)
 	set_bit(KEY_MEDIA, key->input_dev->keybit);
 	set_bit(KEY_POWER, key->input_dev->keybit);
 
+	input_set_capability(key->input_dev, EV_SW, SW_JACK_PHYSICAL_INSERT);
+	input_set_capability(key->input_dev, EV_SW, SW_HEADPHONE_INSERT);
+	input_set_capability(key->input_dev, EV_SW, SW_MICROPHONE_INSERT);
+
 	key->input_dev->name = "cpcap-key";
 
 	err = input_register_device(key->input_dev);
@@ -154,6 +158,18 @@ void cpcap_broadcast_key_event(struct cpcap_device *cpcap,
 	}
 }
 EXPORT_SYMBOL(cpcap_broadcast_key_event);
+
+void cpcap_broadcast_sw_event(struct cpcap_device *cpcap,
+			       unsigned int code, int value)
+{
+	struct cpcap_key_data *key = cpcap_get_keydata(cpcap);
+
+	if (key && key->input_dev) {
+		input_report_switch(key->input_dev, code, value);
+		input_sync(key->input_dev);
+	}
+}
+EXPORT_SYMBOL(cpcap_broadcast_sw_event);
 
 static struct platform_driver cpcap_key_driver = {
 	.probe		= cpcap_key_probe,

@@ -100,6 +100,33 @@ static void send_key_event(struct cpcap_3mm5_data *data, unsigned int state)
 	}
 }
 
+static void send_switch_event(struct cpcap_3mm5_data *data, int state)
+{
+	dev_info(&data->cpcap->spi->dev,
+			"Headset switch state: %d\n",
+			state);
+
+	int headphone = 0;
+	int microphone = 0;
+	int physical = 0;
+
+	switch (state) {
+	case HEADSET_WITH_MIC:
+		physical = 1;
+		headphone = 1;
+		microphone = 1;
+		break;
+	case HEADSET_WITHOUT_MIC:
+		physical = 1;
+		headphone = 1;
+		break;
+	}
+
+	cpcap_broadcast_sw_event(data->cpcap, SW_JACK_PHYSICAL_INSERT, physical);
+	cpcap_broadcast_sw_event(data->cpcap, SW_HEADPHONE_INSERT, headphone);
+	cpcap_broadcast_sw_event(data->cpcap, SW_MICROPHONE_INSERT, microphone);
+}
+
 static void hs_handler(enum cpcap_irqs irq, void *data)
 {
 	struct cpcap_3mm5_data *data_3mm5 = data;
@@ -190,6 +217,7 @@ static void hs_handler(enum cpcap_irqs irq, void *data)
 	switch_set_state(&data_3mm5->sdev, new_state);
 	if (data_3mm5->cpcap->h2w_new_state)
 		data_3mm5->cpcap->h2w_new_state(data_3mm5->cpcap, new_state);
+	send_switch_event(data_3mm5, new_state);
 
 	dev_info(&data_3mm5->cpcap->spi->dev, "New headset state: %d\n",
 		 new_state);
