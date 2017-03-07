@@ -80,7 +80,7 @@ static int __init cpcap_key_probe(struct platform_device *pdev)
 
 	set_bit(EV_KEY, key->input_dev->evbit);
 	set_bit(KEY_MEDIA, key->input_dev->keybit);
-	set_bit(KEY_END, key->input_dev->keybit);
+	set_bit(KEY_POWER, key->input_dev->keybit);
 
 	key->input_dev->name = "cpcap-key";
 
@@ -130,12 +130,13 @@ void cpcap_broadcast_key_event(struct cpcap_device *cpcap,
 	struct cpcap_key_data *key = cpcap_get_keydata(cpcap);
 
 	if (key && key->input_dev) {
-		if (code == KEY_END)
+		if (code == KEY_POWER) {
 			dev_info(&cpcap->spi->dev,
 				"Power key press, value = %d\n",
 					value);
+        }
 #ifdef VERY_LONG_HOLD_REBOOT
-	if (code == KEY_END) {
+	if (code == KEY_POWER) {
 		if (!value) { /* Power key release */
 			hrtimer_cancel(&key->very_longPress_timer);
 		} else if (value == 1) { /* Power key press */

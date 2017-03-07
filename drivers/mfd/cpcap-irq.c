@@ -190,7 +190,7 @@ static enum hrtimer_restart longPress_timer_callback(struct hrtimer *timer)
 
 
 	pwrkey_data->expired = 1;
-	cpcap_broadcast_key_event(cpcap, KEY_END, new_state);
+	cpcap_broadcast_key_event(cpcap, KEY_POWER, new_state);
 	pwrkey_data->state = new_state;
 
 	return HRTIMER_NORESTART;
@@ -218,7 +218,7 @@ static void pwrkey_handler(enum cpcap_irqs irq, void *data)
 			wake_lock_timeout(&pwrkey_data->wake_lock,
 					  2*HZ+5);
 			if (!delayed_work_pending(&pwrkey_data->pwrkey_delayed_work))
-				cpcap_broadcast_key_event(cpcap, KEY_END, PWRKEY_PRESS);
+				cpcap_broadcast_key_event(cpcap, KEY_POWER, PWRKEY_PRESS);
 			schedule_delayed_work(&pwrkey_data->pwrkey_delayed_work,
 					      msecs_to_jiffies(100));
 		} else if (new_state == PWRKEY_RELEASE) {
@@ -228,7 +228,7 @@ static void pwrkey_handler(enum cpcap_irqs irq, void *data)
 			if (pwrkey_data->expired == 1) {
 				pwrkey_data->expired = 0;
 				cpcap_broadcast_key_event(cpcap,
-						KEY_END, new_state);
+						KEY_POWER, new_state);
 				pwrkey_data->state = new_state;
 			}
 		} else if (new_state == PWRKEY_PRESS) {
@@ -247,7 +247,7 @@ static void pwrkey_handler(enum cpcap_irqs irq, void *data)
 #endif
 		wake_lock_timeout(&pwrkey_data->wake_lock, 2*HZ+5);
 		flush_delayed_work(&pwrkey_data->pwrkey_delayed_work);
-		cpcap_broadcast_key_event(cpcap, KEY_END, new_state);
+		cpcap_broadcast_key_event(cpcap, KEY_POWER, new_state);
 		pwrkey_data->state = new_state;
 	} else if ((last_state == PWRKEY_RELEASE) &&
 		   (new_state == PWRKEY_RELEASE)) {
@@ -256,7 +256,7 @@ static void pwrkey_handler(enum cpcap_irqs irq, void *data)
 		wake_lock_timeout(&pwrkey_data->wake_lock,
 				  2*HZ+5);
 		if (!delayed_work_pending(&pwrkey_data->pwrkey_delayed_work))
-			cpcap_broadcast_key_event(cpcap, KEY_END, PWRKEY_PRESS);
+			cpcap_broadcast_key_event(cpcap, KEY_POWER, PWRKEY_PRESS);
 		schedule_delayed_work(&pwrkey_data->pwrkey_delayed_work,
 				      msecs_to_jiffies(100));
 	}
@@ -269,7 +269,7 @@ static void pwrkey_delayed_work_func(struct work_struct *pwrkey_delayed_work)
 		container_of(pwrkey_delayed_work, struct pwrkey_data,
 			     pwrkey_delayed_work.work);
 
-	cpcap_broadcast_key_event(pwrkey_data->cpcap, KEY_END, PWRKEY_RELEASE);
+	cpcap_broadcast_key_event(pwrkey_data->cpcap, KEY_POWER, PWRKEY_RELEASE);
 }
 
 static int pwrkey_init(struct cpcap_device *cpcap)
