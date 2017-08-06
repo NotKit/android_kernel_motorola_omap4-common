@@ -278,6 +278,7 @@ static int __devinit omap4_keypad_probe(struct platform_device *pdev)
 	unsigned int row_shift, max_keys;
 	int irq;
 	int error;
+	unsigned short *keymap;
 
 	/* platform data */
 	pdata = pdev->dev.platform_data;
@@ -369,6 +370,25 @@ static int __devinit omap4_keypad_probe(struct platform_device *pdev)
 
 	matrix_keypad_build_keymap(pdata->keymap_data, row_shift,
 			input_dev->keycode, input_dev->keybit);
+
+	/* Since keymap for Droid 4 is stored in binary device tree
+	* extracted from kernel blob and can't be easily changed,
+	* do some hacky remapping here */
+	keymap = input_dev->keycode;
+	keymap[0x33] = KEY_UP;
+	keymap[0x23] = KEY_LEFT;
+	keymap[0x1b] = KEY_RIGHT;
+	keymap[0x2b] = KEY_DOWN;
+
+	/* Key labelled as "Caps Lock" => "Caps Lock" */
+	keymap[0x1e] = KEY_CAPSLOCK;
+	__set_bit(KEY_CAPSLOCK, input_dev->keybit);
+	/* Key labelled as "SYM => "Alt" */
+	keymap[0x25] = KEY_LEFTALT;
+	__set_bit(KEY_LEFTALT, input_dev->keybit);
+	/* Key labelled as "OK => "Ctrl" */
+	keymap[0x3b] = KEY_RIGHTCTRL;
+	__set_bit(KEY_RIGHTCTRL, input_dev->keybit);
 
 	/*
 	 * Set irq level detection for mpu. Edge event are missed
